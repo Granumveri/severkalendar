@@ -177,16 +177,22 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
 
       <style jsx global>{`
         .fc {
-          --fc-border-color: #27272a !important;
+          --fc-border-color: #3f3f46 !important;
           --fc-button-bg-color: #09090b !important;
-          --fc-button-border-color: #27272a !important;
+          --fc-button-border-color: #3f3f46 !important;
           --fc-button-hover-bg-color: #18181b !important;
           --fc-button-active-bg-color: #fafafa !important;
           --fc-button-active-text-color: #000000 !important;
           --fc-page-bg-color: transparent !important;
-          --fc-today-bg-color: rgba(250, 250, 250, 0.05) !important;
+          --fc-today-bg-color: rgba(250, 250, 250, 0.08) !important;
           color: #fafafa !important;
           font-family: inherit !important;
+        }
+        .fc-theme-standard td, .fc-theme-standard th {
+          border: 1px solid #3f3f46 !important;
+        }
+        .fc .fc-scrollgrid {
+          border: 1px solid #3f3f46 !important;
         }
         .fc-toolbar-title {
           font-size: 1.5rem !important;
@@ -221,10 +227,11 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
         .fc-col-header-cell-cushion {
           text-transform: uppercase !important;
           font-weight: 900 !important;
-          font-size: 0.7rem !important;
-          padding: 10px !important;
+          font-size: 0.75rem !important;
+          padding: 12px 10px !important;
           font-style: italic !important;
-          color: #71717a !important;
+          color: #fafafa !important;
+          letter-spacing: 0.05em !important;
         }
       `}</style>
     </div>

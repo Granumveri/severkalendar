@@ -131,8 +131,16 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
         </div>
   
         <Card className="p-6 bg-zinc-900 border-zinc-800 shadow-2xl relative overflow-hidden">
+          <div 
+            className="absolute inset-0 opacity-20 pointer-events-none"
+            style={{
+              backgroundImage: `url('https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/resized-1766416158822.webp?width=8000&height=8000&resize=contain')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-zinc-50 to-red-600 opacity-50" />
-          <div className="calendar-container">
+          <div className="calendar-container relative z-10">
             <FullCalendar
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
               headerToolbar={{

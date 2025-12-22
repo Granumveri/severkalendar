@@ -1,65 +1,83 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import { createClientClient } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { CalendarIcon, LogOut } from "lucide-react";
+import { CalendarApp } from "@/components/CalendarApp";
+import { AuthForm } from "@/components/AuthForm";
 
 export default function Home() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClientClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+
+    getUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-zinc-950">
+        <div className="animate-pulse text-2xl font-bold text-white uppercase italic tracking-tighter">Северный человек...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthForm />;
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main className="min-h-screen bg-zinc-950 text-zinc-50 font-sans">
+      <header className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-md sticky top-0 z-50">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-zinc-50 rounded flex items-center justify-center">
+              <CalendarIcon className="text-black w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight uppercase italic">Северный человек</h1>
+              <p className="text-[10px] text-zinc-500 font-medium tracking-[0.2em] -mt-1">КАЛЕНДАРЬ ГРУППЫ</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col items-end hidden sm:flex">
+              <span className="text-sm font-bold uppercase italic">{user.user_metadata?.full_name || user.email}</span>
+              <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">{user.user_metadata?.role || 'Участник'}</span>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => supabase.auth.signOut()}
+              className="hover:bg-red-500/10 hover:text-red-500 transition-colors"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              <LogOut className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </header>
+
+      <div className="container mx-auto py-8 px-4">
+        <CalendarApp currentUser={user} />
+      </div>
+    </main>
   );
 }

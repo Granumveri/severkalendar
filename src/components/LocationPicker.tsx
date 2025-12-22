@@ -30,7 +30,7 @@ function MapEvents({ onChange }: { onChange: (lat: number, lng: number) => void 
 
 export function LocationPicker({ lat, lng, onChange }: LocationPickerProps) {
   const [mounted, setMounted] = useState(false);
-  const initialPos: [number, number] = [lat || 55.7558, lng || 37.6173]; // Moscow default
+  const initialPos: [number, number] = [lat || 53.5078, lng || 49.4172]; // Tolyatti default
 
   useEffect(() => {
     setMounted(true);

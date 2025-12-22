@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -28,9 +28,18 @@ function MapEvents({ onChange }: { onChange: (lat: number, lng: number) => void 
   return null;
 }
 
+function ChangeView({ center }: { center: [number, number] }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center);
+  }, [center, map]);
+  return null;
+}
+
 export function LocationPicker({ lat, lng, onChange }: LocationPickerProps) {
   const [mounted, setMounted] = useState(false);
-  const initialPos: [number, number] = [lat || 53.5078, lng || 49.4172]; // Tolyatti default
+  const tolyatti: [number, number] = [53.5078, 49.4172];
+  const initialPos: [number, number] = lat && lng ? [lat, lng] : tolyatti;
 
   useEffect(() => {
     setMounted(true);
@@ -52,11 +61,14 @@ export function LocationPicker({ lat, lng, onChange }: LocationPickerProps) {
           />
           <MapEvents onChange={onChange} />
           {lat && lng && (
-            <Marker position={[lat, lng]} icon={defaultIcon} />
+            <>
+              <ChangeView center={[lat, lng]} />
+              <Marker position={[lat, lng]} icon={defaultIcon} />
+            </>
           )}
         </MapContainer>
       </div>
-      <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest text-center">
+      <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest text-center">
         Нажмите на карту, чтобы выбрать местоположение
       </p>
     </div>

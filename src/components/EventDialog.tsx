@@ -61,6 +61,29 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
     }
   }, [event, isOpen, currentUser.id]);
 
+  useEffect(() => {
+    if (!location || location.length < 3) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1&countrycodes=ru`
+        );
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lng = parseFloat(data[0].lon);
+          setLocationLat(lat);
+          setLocationLng(lng);
+        }
+      } catch (err) {
+        console.error("Geocoding error:", err);
+      }
+    }, 1500); // 1.5s delay to avoid too many requests
+
+    return () => clearTimeout(timer);
+  }, [location]);
+
   const handleSave = async () => {
     if (!title || !startTime || !endTime) {
       toast.error("Заполните обязательные поля");

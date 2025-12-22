@@ -154,13 +154,24 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
                     <SelectTrigger className="bg-zinc-950 border-zinc-800 font-bold italic h-12">
                       <SelectValue placeholder="Выберите ответственного" />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-50 font-bold italic">
-                      {profiles.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>{p.full_name || 'Без имени'}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                      <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-50 font-bold italic">
+                        {profiles.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>{p.full_name || 'Без имени'}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {responsibleId && profiles.find(p => p.id === responsibleId)?.email && (
+                      <div className="mt-1">
+                        <a 
+                          href={`mailto:${profiles.find(p => p.id === responsibleId).email}`}
+                          className="text-[10px] text-red-500 hover:text-red-400 font-bold flex items-center gap-1 uppercase"
+                        >
+                          Связаться по почте
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
               </div>
 
             <div className="grid grid-cols-2 gap-4">

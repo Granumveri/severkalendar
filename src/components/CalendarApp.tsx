@@ -21,13 +21,13 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
   const [searchTerm, setSearchTerm] = useState("");
   const supabase = createClientClient();
 
-  const fetchEvents = useCallback(async () => {
+    const fetchEvents = useCallback(async () => {
     const { data } = await supabase
       .from("events")
       .select(`
         *,
-        owner:profiles!owner_id(full_name, avatar_url),
-        responsible:profiles!responsible_id(full_name, avatar_url),
+        owner:profiles!owner_id(id, full_name, avatar_url, email),
+        responsible:profiles!responsible_id(id, full_name, avatar_url, email),
         participants:event_participants(user_id, profile:profiles(full_name))
       `)
       .order('start_time', { ascending: true })
@@ -46,6 +46,13 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
       setEvents(formattedEvents);
     }
   }, [supabase]);
+
+  const filteredEvents = events.filter(event => 
+    event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    event.extendedProps.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    event.extendedProps.responsible?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -132,10 +139,11 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
               editable={true}
               selectable={true}
               selectMirror={true}
-              dayMaxEvents={true}
-              weekends={true}
-              events={events}
-              select={handleDateSelect}
+                dayMaxEvents={true}
+                weekends={true}
+                events={filteredEvents}
+                select={handleDateSelect}
+
               eventClick={handleEventClick}
               eventContent={renderEventContent}
               locale={ruLocale}

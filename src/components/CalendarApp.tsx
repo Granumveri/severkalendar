@@ -9,7 +9,7 @@ import listPlugin from "@fullcalendar/list";
 import ruLocale from "@fullcalendar/core/locales/ru";
 import { createClientClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, MapPin } from "lucide-react";
 import { EventDialog } from "@/components/EventDialog";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -87,10 +87,15 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
     };
 
     const renderEventContent = (eventInfo: any) => {
-      const { responsible } = eventInfo.event.extendedProps;
+      const { responsible, location_lat, location_lng } = eventInfo.event.extendedProps;
       return (
         <div className="flex flex-col overflow-hidden">
-          <div className="font-bold truncate">{eventInfo.event.title}</div>
+          <div className="flex items-center justify-between gap-1">
+            <div className="font-bold truncate">{eventInfo.event.title}</div>
+            {(location_lat && location_lng) && (
+              <MapPin className="w-2.5 h-2.5 flex-shrink-0 text-red-500" />
+            )}
+          </div>
           {responsible && (
             <div className="text-[8px] opacity-70 truncate flex items-center gap-1">
               <div className="w-2 h-2 rounded-full bg-zinc-50" />

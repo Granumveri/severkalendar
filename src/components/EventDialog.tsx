@@ -10,9 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { MapPin, Trash2, User } from "lucide-react";
+import { MapPin, Trash2, User, ExternalLink } from "lucide-react";
 import { Comments } from "@/components/Comments";
 import { sendEventNotification } from "@/app/actions/notifications";
+import { LocationPicker } from "./LocationPicker";
 
 export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUser }: any) {
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,8 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("meeting");
   const [responsibleId, setResponsibleId] = useState<string | null>(null);
+  const [locationLat, setLocationLat] = useState<number | null>(null);
+  const [locationLng, setLocationLng] = useState<number | null>(null);
   const [profiles, setProfiles] = useState<any[]>([]);
   const supabase = createClientClient();
 
@@ -43,6 +46,8 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       setLocation(event.location || "");
       setCategory(event.category || "meeting");
       setResponsibleId(event.responsible_id || null);
+      setLocationLat(event.location_lat || null);
+      setLocationLng(event.location_lng || null);
     } else {
       setTitle("");
       setDescription("");
@@ -51,6 +56,8 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       setLocation("");
       setCategory("meeting");
       setResponsibleId(currentUser.id);
+      setLocationLat(null);
+      setLocationLng(null);
     }
   }, [event, isOpen, currentUser.id]);
 
@@ -70,6 +77,8 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       category,
       owner_id: currentUser.id,
       responsible_id: responsibleId,
+      location_lat: locationLat,
+      location_lng: locationLng,
       updated_at: new Date().toISOString(),
     };
 
@@ -210,18 +219,51 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Локация</Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                  <Input 
-                    value={location} 
-                    onChange={(e) => setLocation(e.target.value)} 
-                    className="pl-10 bg-zinc-950 border-zinc-800 font-bold italic"
-                    placeholder="Место встречи..."
+                <div className="space-y-4">
+                  <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Локация</Label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <Input 
+                      value={location} 
+                      onChange={(e) => setLocation(e.target.value)} 
+                      className="pl-10 bg-zinc-950 border-zinc-800 font-bold italic"
+                      placeholder="Место встречи..."
+                    />
+                  </div>
+                  
+                  <LocationPicker 
+                    lat={locationLat} 
+                    lng={locationLng} 
+                    onChange={(lat, lng) => {
+                      setLocationLat(lat);
+                      setLocationLng(lng);
+                    }} 
                   />
+                  
+                  {locationLat && locationLng && (
+                    <div className="flex gap-4">
+                      <a 
+                        href={`https://yandex.ru/maps/?pt=${locationLng},${locationLat}&z=16&l=map`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 uppercase font-bold transition-colors"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        ЯНДЕКС КАРТЫ
+                      </a>
+                      <a 
+                        href={`https://2gis.ru/geo/${locationLng},${locationLat}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 uppercase font-bold transition-colors"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        2GIS
+                      </a>
+                    </div>
+                  )}
                 </div>
-              </div>
+
             </div>
 
             <div className="space-y-2">

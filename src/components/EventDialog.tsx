@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { MapPin, Trash2 } from "lucide-react";
+import { MapPin, Trash2, User } from "lucide-react";
 import { Comments } from "@/components/Comments";
+import { sendEventNotification } from "@/app/actions/notifications";
 
 export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUser }: any) {
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,17 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
   const [endTime, setEndTime] = useState("");
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("meeting");
+  const [responsibleId, setResponsibleId] = useState<string | null>(null);
+  const [profiles, setProfiles] = useState<any[]>([]);
   const supabase = createClientClient();
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      const { data } = await supabase.from("profiles").select("id, full_name, email");
+      if (data) setProfiles(data);
+    };
+    fetchProfiles();
+  }, [supabase]);
 
   useEffect(() => {
     if (event) {
@@ -31,6 +42,7 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       setEndTime(event.end_time ? format(new Date(event.end_time), "yyyy-MM-dd'T'HH:mm") : "");
       setLocation(event.location || "");
       setCategory(event.category || "meeting");
+      setResponsibleId(event.responsible_id || null);
     } else {
       setTitle("");
       setDescription("");
@@ -38,8 +50,9 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       setEndTime("");
       setLocation("");
       setCategory("meeting");
+      setResponsibleId(currentUser.id);
     }
-  }, [event, isOpen]);
+  }, [event, isOpen, currentUser.id]);
 
   const handleSave = async () => {
     if (!title || !startTime || !endTime) {
@@ -48,7 +61,7 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
     }
 
     setLoading(true);
-    const eventData = {
+    const eventData: any = {
       title,
       description,
       start_time: new Date(startTime).toISOString(),
@@ -56,22 +69,42 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       location,
       category,
       owner_id: currentUser.id,
+      responsible_id: responsibleId,
       updated_at: new Date().toISOString(),
     };
 
     let error;
+    let savedEvent;
     if (event?.id) {
-      const { error: err } = await supabase.from("events").update(eventData).eq("id", event.id);
+      const { data, error: err } = await supabase.from("events").update(eventData).eq("id", event.id).select().single();
       error = err;
+      savedEvent = data;
     } else {
-      const { error: err } = await supabase.from("events").insert([eventData]);
+      const { data, error: err } = await supabase.from("events").insert([eventData]).select().single();
       error = err;
+      savedEvent = data;
     }
 
     if (error) {
       toast.error("Ошибка сохранения: " + error.message);
     } else {
       toast.success("Событие сохранено");
+      
+      // Notify responsible person
+      if (responsibleId) {
+        const responsibleProfile = profiles.find(p => p.id === responsibleId);
+        if (responsibleProfile?.email) {
+          await sendEventNotification({
+            to: responsibleProfile.email,
+            subject: event?.id ? 'Изменение мероприятия' : 'Новое мероприятие',
+            title,
+            description,
+            startTime,
+            location
+          });
+        }
+      }
+
       onSuccess();
       onOpenChange(false);
     }
@@ -104,16 +137,31 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
             </DialogTitle>
           </DialogHeader>
 
-          <div className="grid gap-6">
-            <div className="space-y-2">
-              <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Заголовок</Label>
-              <Input 
-                value={title} 
-                onChange={(e) => setTitle(e.target.value)} 
-                className="bg-zinc-950 border-zinc-800 font-bold italic h-12 text-lg"
-                placeholder="Название мероприятия..."
-              />
-            </div>
+            <div className="grid gap-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Заголовок</Label>
+                  <Input 
+                    value={title} 
+                    onChange={(e) => setTitle(e.target.value)} 
+                    className="bg-zinc-950 border-zinc-800 font-bold italic h-12 text-lg"
+                    placeholder="Название мероприятия..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Ответственный</Label>
+                  <Select value={responsibleId || ""} onValueChange={setResponsibleId}>
+                    <SelectTrigger className="bg-zinc-950 border-zinc-800 font-bold italic h-12">
+                      <SelectValue placeholder="Выберите ответственного" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-50 font-bold italic">
+                      {profiles.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>{p.full_name || 'Без имени'}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">

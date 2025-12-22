@@ -27,8 +27,11 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
       .select(`
         *,
         owner:profiles!owner_id(full_name, avatar_url),
+        responsible:profiles!responsible_id(full_name, avatar_url),
         participants:event_participants(user_id, profile:profiles(full_name))
-      `);
+      `)
+      .order('start_time', { ascending: true })
+      .limit(1000);
     
     if (data) {
       const formattedEvents = data.map((event: any) => ({
@@ -71,61 +74,77 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
     setIsDialogOpen(true);
   };
 
-  const handleEventClick = (clickInfo: any) => {
-    setSelectedEvent(clickInfo.event.extendedProps);
-    setIsDialogOpen(true);
-  };
+    const handleEventClick = (clickInfo: any) => {
+      setSelectedEvent(clickInfo.event.extendedProps);
+      setIsDialogOpen(true);
+    };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4 flex-1">
-          <div className="relative w-full max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-            <Input 
-              placeholder="Поиск мероприятий..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-zinc-900 border-zinc-800 text-zinc-50 font-bold italic"
+    const renderEventContent = (eventInfo: any) => {
+      const { responsible } = eventInfo.event.extendedProps;
+      return (
+        <div className="flex flex-col overflow-hidden">
+          <div className="font-bold truncate">{eventInfo.event.title}</div>
+          {responsible && (
+            <div className="text-[8px] opacity-70 truncate flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-zinc-50" />
+              {responsible.full_name}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4 flex-1">
+            <div className="relative w-full max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+              <Input 
+                placeholder="Поиск мероприятий..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-zinc-900 border-zinc-800 text-zinc-50 font-bold italic"
+              />
+            </div>
+          </div>
+  
+          <Button 
+            onClick={() => { setSelectedEvent(null); setIsDialogOpen(true); }}
+            className="bg-zinc-50 text-black hover:bg-zinc-200 font-black italic tracking-tighter"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            НОВОЕ СОБЫТИЕ
+          </Button>
+        </div>
+  
+        <Card className="p-6 bg-zinc-900 border-zinc-800 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-zinc-50 to-red-600 opacity-50" />
+          <div className="calendar-container">
+            <FullCalendar
+              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+              }}
+              initialView="dayGridMonth"
+              editable={true}
+              selectable={true}
+              selectMirror={true}
+              dayMaxEvents={true}
+              weekends={true}
+              events={events}
+              select={handleDateSelect}
+              eventClick={handleEventClick}
+              eventContent={renderEventContent}
+              locale={ruLocale}
+              height="auto"
+              slotMinTime="07:00:00"
+              slotMaxTime="22:00:00"
             />
           </div>
-        </div>
-
-        <Button 
-          onClick={() => { setSelectedEvent(null); setIsDialogOpen(true); }}
-          className="bg-zinc-50 text-black hover:bg-zinc-200 font-black italic tracking-tighter"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          НОВОЕ СОБЫТИЕ
-        </Button>
-      </div>
-
-      <Card className="p-6 bg-zinc-900 border-zinc-800 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-zinc-50 to-red-600 opacity-50" />
-        <div className="calendar-container">
-          <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-            }}
-            initialView="dayGridMonth"
-            editable={true}
-            selectable={true}
-            selectMirror={true}
-            dayMaxEvents={true}
-            weekends={true}
-            events={events}
-            select={handleDateSelect}
-            eventClick={handleEventClick}
-            locale={ruLocale}
-            height="auto"
-            slotMinTime="07:00:00"
-            slotMaxTime="22:00:00"
-          />
-        </div>
-      </Card>
+        </Card>
 
       <EventDialog 
         isOpen={isDialogOpen} 

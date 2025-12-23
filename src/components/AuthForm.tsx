@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClientClient } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -14,13 +14,13 @@ export function AuthForm() {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientClient();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
+    const supabase = getSupabaseClient();
     const { error } = isSignUp 
       ? await supabase.auth.signUp({ 
           email, 

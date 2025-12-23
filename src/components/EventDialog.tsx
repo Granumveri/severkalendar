@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClientClient } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,10 +28,10 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
   const [locationLat, setLocationLat] = useState<number | null>(null);
   const [locationLng, setLocationLng] = useState<number | null>(null);
   const [profiles, setProfiles] = useState<any[]>([]);
-  const supabase = createClientClient();
 
   useEffect(() => {
     const fetchProfiles = async () => {
+      const supabase = getSupabaseClient();
       const { data, error } = await supabase.from("profiles").select("id, full_name, email");
       if (error) {
         console.error("Error fetching profiles:", error);
@@ -40,7 +40,7 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       if (data) setProfiles(data);
     };
     fetchProfiles();
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
     if (event) {
@@ -135,6 +135,7 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       eventData.owner_id = currentUser.id;
     }
 
+    const supabase = getSupabaseClient();
     let error;
     if (event?.id) {
       const { error: err } = await supabase.from("events").update(eventData).eq("id", event.id);
@@ -172,6 +173,7 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
   const handleDelete = async () => {
     if (!confirm("Удалить это событие из календаря?")) return;
     setLoading(true);
+    const supabase = getSupabaseClient();
     const { error } = await supabase.from("events").delete().eq("id", event.id);
     if (error) {
       toast.error("Ошибка удаления: " + error.message);

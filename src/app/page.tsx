@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClientClient } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, LogOut } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -15,9 +15,9 @@ const CalendarApp = dynamic(() => import("@/components/CalendarApp").then(mod =>
 export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClientClient();
 
   useEffect(() => {
+    const supabase = getSupabaseClient();
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
@@ -35,7 +35,12 @@ export default function Home() {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, []);
+
+  const handleSignOut = async () => {
+    const supabase = getSupabaseClient();
+    await supabase.auth.signOut();
+  };
 
   if (loading) {
     return (
@@ -80,7 +85,7 @@ export default function Home() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => supabase.auth.signOut()}
+              onClick={handleSignOut}
               className="hover:bg-red-500/10 hover:text-red-500 transition-colors"
             >
               <LogOut className="w-5 h-5" />

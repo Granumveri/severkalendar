@@ -7,7 +7,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import ruLocale from "@fullcalendar/core/locales/ru";
-import { createClientClient } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, MapPin } from "lucide-react";
 import { EventDialog } from "@/components/EventDialog";
@@ -20,10 +20,10 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const supabase = createClientClient();
 
-    const fetchEvents = useCallback(async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from("events")
       .select(`
@@ -52,7 +52,7 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
       setEvents(formattedEvents);
     }
     setLoading(false);
-  }, [supabase]);
+  }, []);
 
   const filteredEvents = events.filter(event => 
     event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -73,6 +73,7 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
   useEffect(() => {
     fetchEvents();
 
+    const supabase = getSupabaseClient();
     const subscription = supabase
       .channel("calendar_changes")
       .on("postgres_changes", { event: "*", schema: "public", table: "events" }, () => fetchEvents())
@@ -81,7 +82,7 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase, fetchEvents]);
+  }, [fetchEvents]);
 
   const handleDateSelect = (selectInfo: any) => {
     setSelectedEvent({ start_time: selectInfo.startStr, end_time: selectInfo.endStr });

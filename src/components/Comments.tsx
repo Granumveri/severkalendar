@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClientClient } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,9 +14,9 @@ export function Comments({ eventId, currentUser }: { eventId: string, currentUse
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
-  const supabase = createClientClient();
 
   const fetchComments = async () => {
+    const supabase = getSupabaseClient();
     const { data } = await supabase
       .from("comments")
       .select("*, profile:profiles(full_name, avatar_url)")
@@ -29,6 +29,7 @@ export function Comments({ eventId, currentUser }: { eventId: string, currentUse
   useEffect(() => {
     fetchComments();
 
+    const supabase = getSupabaseClient();
     const subscription = supabase
       .channel(`comments_${eventId}`)
       .on("postgres_changes", { 
@@ -42,11 +43,12 @@ export function Comments({ eventId, currentUser }: { eventId: string, currentUse
     return () => {
       subscription.unsubscribe();
     };
-  }, [eventId, supabase]);
+  }, [eventId]);
 
   const handleSend = async () => {
     if (!newComment.trim()) return;
     setLoading(true);
+    const supabase = getSupabaseClient();
     const { error } = await supabase.from("comments").insert([
       {
         event_id: eventId,

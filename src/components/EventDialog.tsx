@@ -136,7 +136,7 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       end_time: end.toISOString(),
       location,
       category,
-      responsible_id: responsibleId,
+      responsible_id: responsibleId && responsibleId !== "" ? responsibleId : null,
       location_lat: locationLat,
       location_lng: locationLng,
       updated_at: new Date().toISOString(),
@@ -163,6 +163,7 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
     }
 
     if (error) {
+      console.error("Save error details:", error);
       toast.error("Ошибка сохранения: " + error.message);
     } else {
       // If there's a first comment for a new event, save it
@@ -178,17 +179,22 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
 
       toast.success("Событие сохранено");
       
-      if (responsibleId) {
+      if (responsibleId && responsibleId !== "") {
         const responsibleProfile = profiles.find(p => p.id === responsibleId);
         if (responsibleProfile?.email) {
-          await sendEventNotification({
-            to: responsibleProfile.email,
-            subject: event?.id ? 'Изменение мероприятия' : 'Новое мероприятие',
-            title,
-            description,
-            startTime,
-            location
-          });
+          try {
+            await sendEventNotification({
+              to: responsibleProfile.email,
+              subject: event?.id ? 'Изменение мероприятия' : 'Новое мероприятие',
+              title,
+              description,
+              startTime,
+              location
+            });
+          } catch (notificationError) {
+            console.error("Failed to send notification:", notificationError);
+            // Don't show error to user as the event is already saved
+          }
         }
       }
 

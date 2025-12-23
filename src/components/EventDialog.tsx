@@ -17,6 +17,7 @@ import { LocationPicker } from "./LocationPicker";
 
 export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUser }: any) {
   const [loading, setLoading] = useState(false);
+  const [geocoding, setGeocoding] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -31,7 +32,11 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
 
   useEffect(() => {
     const fetchProfiles = async () => {
-      const { data } = await supabase.from("profiles").select("id, full_name, email");
+      const { data, error } = await supabase.from("profiles").select("id, full_name, email");
+      if (error) {
+        console.error("Error fetching profiles:", error);
+        return;
+      }
       if (data) setProfiles(data);
     };
     fetchProfiles();
@@ -62,8 +67,13 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
   }, [event, isOpen, currentUser.id]);
 
   useEffect(() => {
-    if (!location || location.length < 3) return;
+    if (!location || location.length < 3) {
+      setLocationLat(null);
+      setLocationLng(null);
+      return;
+    }
 
+    setGeocoding(true);
     const timer = setTimeout(async () => {
       try {
         const response = await fetch(
@@ -75,13 +85,21 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
           const lng = parseFloat(data[0].lon);
           setLocationLat(lat);
           setLocationLng(lng);
+        } else {
+          setLocationLat(null);
+          setLocationLng(null);
         }
       } catch (err) {
         console.error("Geocoding error:", err);
+      } finally {
+        setGeocoding(false);
       }
-    }, 1500); // 1.5s delay to avoid too many requests
+    }, 1500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      setGeocoding(false);
+    };
   }, [location]);
 
   const handleSave = async () => {
@@ -90,31 +108,40 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       return;
     }
 
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+
+    if (end <= start) {
+      toast.error("Время окончания должно быть позже времени начала");
+      return;
+    }
+
     setLoading(true);
     const eventData: any = {
       title,
       description,
-      start_time: new Date(startTime).toISOString(),
-      end_time: new Date(endTime).toISOString(),
+      start_time: start.toISOString(),
+      end_time: end.toISOString(),
       location,
       category,
-      owner_id: currentUser.id,
       responsible_id: responsibleId,
       location_lat: locationLat,
       location_lng: locationLng,
       updated_at: new Date().toISOString(),
     };
 
+    // Only set owner_id for new events to prevent hijacking
+    if (!event?.id) {
+      eventData.owner_id = currentUser.id;
+    }
+
     let error;
-    let savedEvent;
     if (event?.id) {
-      const { data, error: err } = await supabase.from("events").update(eventData).eq("id", event.id).select().single();
+      const { error: err } = await supabase.from("events").update(eventData).eq("id", event.id);
       error = err;
-      savedEvent = data;
     } else {
-      const { data, error: err } = await supabase.from("events").insert([eventData]).select().single();
+      const { error: err } = await supabase.from("events").insert([eventData]);
       error = err;
-      savedEvent = data;
     }
 
     if (error) {
@@ -122,7 +149,6 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
     } else {
       toast.success("Событие сохранено");
       
-      // Notify responsible person
       if (responsibleId) {
         const responsibleProfile = profiles.find(p => p.id === responsibleId);
         if (responsibleProfile?.email) {
@@ -242,17 +268,19 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
                   </SelectContent>
                 </Select>
               </div>
-                <div className="space-y-4">
-                  <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Локация</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                    <Input 
-                      value={location} 
-                      onChange={(e) => setLocation(e.target.value)} 
-                      className="pl-10 bg-zinc-950 border-zinc-800 font-bold italic"
-                      placeholder="Место встречи..."
-                    />
-                  </div>
+                  <div className="space-y-4">
+                    <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">
+                      Локация {geocoding && <span className="animate-pulse text-red-500 ml-2">(ПОИСК...)</span>}
+                    </Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                      <Input 
+                        value={location} 
+                        onChange={(e) => setLocation(e.target.value)} 
+                        className="pl-10 bg-zinc-950 border-zinc-800 font-bold italic"
+                        placeholder="Место встречи..."
+                      />
+                    </div>
                   
                   <LocationPicker 
                     lat={locationLat} 

@@ -16,13 +16,15 @@ import { Input } from "@/components/ui/input";
 
 export function CalendarApp({ currentUser }: { currentUser: any }) {
   const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const supabase = createClientClient();
 
     const fetchEvents = useCallback(async () => {
-    const { data } = await supabase
+    setLoading(true);
+    const { data, error } = await supabase
       .from("events")
       .select(`
         *,
@@ -33,6 +35,10 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
       .order('start_time', { ascending: true })
       .limit(1000);
     
+    if (error) {
+      console.error("Error fetching events:", error);
+    }
+
     if (data) {
       const formattedEvents = data.map((event: any) => ({
         id: event.id,
@@ -45,6 +51,7 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
       }));
       setEvents(formattedEvents);
     }
+    setLoading(false);
   }, [supabase]);
 
   const filteredEvents = events.filter(event => 
@@ -130,9 +137,14 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
           </Button>
         </div>
   
-        <Card className="p-6 bg-zinc-900 border-zinc-800 shadow-2xl relative overflow-hidden">
-          <div 
-            className="absolute inset-0 opacity-20 pointer-events-none"
+          <Card className="p-6 bg-zinc-900 border-zinc-800 shadow-2xl relative overflow-hidden">
+            {loading && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-zinc-50" />
+              </div>
+            )}
+            <div 
+              className="absolute inset-0 opacity-20 pointer-events-none"
             style={{
               backgroundImage: `url('https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/resized-1766416158822.webp?width=8000&height=8000&resize=contain')`,
               backgroundSize: 'cover',

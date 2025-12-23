@@ -2,21 +2,17 @@
 
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import listPlugin from "@fullcalendar/list";
-import ruLocale from "@fullcalendar/core/locales/ru";
 import { getSupabaseClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, MapPin } from "lucide-react";
 import { EventDialog } from "@/components/EventDialog";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import ruLocale from "@fullcalendar/core/locales/ru";
 
 const FullCalendar = dynamic(() => import("@fullcalendar/react"), {
   ssr: false,
-  loading: () => <div className="h-[600px] w-full bg-zinc-800 animate-pulse rounded-lg" />
+  loading: () => <div className="h-[600px] w-full bg-zinc-800 animate-pulse rounded-lg flex items-center justify-center text-zinc-500 font-bold italic uppercase">Загрузка календаря...</div>
 });
 
 export function CalendarApp({ currentUser }: { currentUser: any }) {
@@ -25,6 +21,25 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [calendarPlugins, setCalendarPlugins] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadPlugins = async () => {
+      const [dayGrid, interaction, timeGrid, list] = await Promise.all([
+        import('@fullcalendar/daygrid'),
+        import('@fullcalendar/interaction'),
+        import('@fullcalendar/timegrid'),
+        import('@fullcalendar/list'),
+      ]);
+      setCalendarPlugins([
+        dayGrid.default,
+        interaction.default,
+        timeGrid.default,
+        list.default,
+      ]);
+    };
+    loadPlugins();
+  }, []);
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
@@ -155,31 +170,35 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
                 </div>
               )}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-zinc-50 to-red-600 opacity-50" />
-            <div className="calendar-container relative z-10">
-            <FullCalendar
-              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-              headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-              }}
-              initialView="dayGridMonth"
-              editable={true}
-              selectable={true}
-              selectMirror={true}
-                dayMaxEvents={true}
-                weekends={true}
-                events={filteredEvents}
-                select={handleDateSelect}
+              <div className="calendar-container relative z-10">
+              {calendarPlugins.length > 0 ? (
+                <FullCalendar
+                  plugins={calendarPlugins}
+                  headerToolbar={{
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+                  }}
+                  initialView="dayGridMonth"
+                  editable={true}
+                  selectable={true}
+                  selectMirror={true}
+                    dayMaxEvents={true}
+                    weekends={true}
+                    events={filteredEvents}
+                    select={handleDateSelect}
 
-              eventClick={handleEventClick}
-              eventContent={renderEventContent}
-              locale={ruLocale}
-              height="auto"
-              slotMinTime="07:00:00"
-              slotMaxTime="22:00:00"
-            />
-          </div>
+                  eventClick={handleEventClick}
+                  eventContent={renderEventContent}
+                  locale={ruLocale}
+                  height="auto"
+                  slotMinTime="07:00:00"
+                  slotMaxTime="22:00:00"
+                />
+              ) : (
+                <div className="h-[600px] w-full bg-zinc-800 animate-pulse rounded-lg flex items-center justify-center text-zinc-500 font-bold italic uppercase">Подготовка плагинов...</div>
+              )}
+            </div>
         </Card>
 
       <EventDialog 

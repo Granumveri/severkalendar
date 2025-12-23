@@ -45,21 +45,25 @@ export function Comments({ eventId, currentUser }: { eventId: string, currentUse
     };
   }, [eventId]);
 
-  const handleSend = async () => {
-    if (!newComment.trim()) return;
-    setLoading(true);
-    const supabase = getSupabaseClient();
-    const { error } = await supabase.from("comments").insert([
-      {
-        event_id: eventId,
-        user_id: currentUser.id,
-        content: newComment.trim(),
+    const handleSend = async () => {
+      if (!newComment.trim()) return;
+      setLoading(true);
+      const supabase = getSupabaseClient();
+      const { error } = await supabase.from("comments").insert([
+        {
+          event_id: eventId,
+          user_id: currentUser.id,
+          content: newComment.trim(),
+        }
+      ]);
+  
+      if (error) {
+        import("sonner").then(({ toast }) => toast.error("Ошибка отправки: " + error.message));
+      } else {
+        setNewComment("");
       }
-    ]);
-
-    if (!error) setNewComment("");
-    setLoading(false);
-  };
+      setLoading(false);
+    };
 
   return (
     <div className="flex flex-col h-[400px] border-t border-zinc-800 mt-6 pt-6 bg-zinc-900/50 p-4 rounded-lg">

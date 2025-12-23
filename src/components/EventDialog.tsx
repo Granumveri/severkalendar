@@ -33,6 +33,11 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
   const [locationLat, setLocationLat] = useState<number | null>(null);
   const [locationLng, setLocationLng] = useState<number | null>(null);
   const [profiles, setProfiles] = useState<any[]>([]);
+  const [currentEventId, setCurrentEventId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCurrentEventId(event?.id || null);
+  }, [event?.id]);
 
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -142,12 +147,17 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
 
     const supabase = getSupabaseClient();
     let error;
+    let newId = event?.id;
+
     if (event?.id) {
       const { error: err } = await supabase.from("events").update(eventData).eq("id", event.id);
       error = err;
     } else {
-      const { error: err } = await supabase.from("events").insert([eventData]);
+      const { data: insertedData, error: err } = await supabase.from("events").insert([eventData]).select();
       error = err;
+      if (insertedData && insertedData[0]) {
+        newId = insertedData[0].id;
+      }
     }
 
     if (error) {
@@ -170,7 +180,12 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       }
 
       onSuccess();
-      onOpenChange(false);
+      if (!event?.id && newId) {
+        setCurrentEventId(newId);
+        // Don't close the dialog so the user can see the comments section
+      } else {
+        onOpenChange(false);
+      }
     }
     setLoading(false);
   };
@@ -196,11 +211,11 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-zinc-50 to-red-600" />
         
         <div className="p-8 space-y-8">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-black italic uppercase italic tracking-tighter">
-              {event?.id ? "Редактирование" : "Новая запись"}
-            </DialogTitle>
-          </DialogHeader>
+            <DialogHeader>
+              <DialogTitle className="text-3xl font-black italic uppercase italic tracking-tighter">
+                {currentEventId ? "Редактирование" : "Новая запись"}
+              </DialogTitle>
+            </DialogHeader>
 
             <div className="grid gap-6">
               <div className="grid grid-cols-2 gap-4">
@@ -335,14 +350,14 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
             </div>
           </div>
 
-          {event?.id && (
-            <Comments eventId={event.id} currentUser={currentUser} />
+          {currentEventId && (
+            <Comments eventId={currentEventId} currentUser={currentUser} />
           )}
         </div>
 
         <DialogFooter className="p-8 pt-0 flex justify-between items-center bg-zinc-900/50">
           <div>
-            {event?.id && (
+            {currentEventId && (
               <Button 
                 variant="ghost" 
                 onClick={handleDelete} 

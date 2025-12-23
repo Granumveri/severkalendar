@@ -1,20 +1,30 @@
 import { createClient } from '@supabase/supabase-js';
 import { createBrowserClient } from '@supabase/ssr';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Функция для получения клиента на стороне сервера (в API routes, getServerSideProps и т.д.)
+export function createServerClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  if (!url || !key) {
+    throw new Error(
+      'NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY должны быть установлены'
+    );
+  }
+
+  return createClient(url, key);
 }
 
-// This is for general use
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Функция для клиента на стороне браузера
+export function createClientClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// This is for client components in Next.js
-export const createClientClient = () => {
-  return createBrowserClient(
-    supabaseUrl!,
-    supabaseAnonKey!
-  );
-};
+  if (!url || !key) {
+    throw new Error(
+      'NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY должны быть установлены'
+    );
+  }
+
+  return createBrowserClient(url, key);
+}

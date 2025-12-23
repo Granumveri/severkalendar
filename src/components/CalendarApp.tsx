@@ -137,22 +137,14 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
           </Button>
         </div>
   
-          <Card className="p-6 bg-zinc-900 border-zinc-800 shadow-2xl relative overflow-hidden">
-            {loading && (
-              <div className="absolute inset-0 z-50 flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-zinc-50" />
-              </div>
-            )}
-            <div 
-              className="absolute inset-0 opacity-20 pointer-events-none"
-            style={{
-              backgroundImage: `url('https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/resized-1766416158822.webp?width=8000&height=8000&resize=contain')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          />
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-zinc-50 to-red-600 opacity-50" />
-          <div className="calendar-container relative z-10">
+            <Card className="p-6 bg-zinc-900 border-zinc-800 shadow-2xl relative overflow-hidden">
+              {loading && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-zinc-50" />
+                </div>
+              )}
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-zinc-50 to-red-600 opacity-50" />
+            <div className="calendar-container relative z-10">
             <FullCalendar
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
               headerToolbar={{

@@ -35,10 +35,6 @@ export default function Home() {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-zinc-950 relative overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
-          style={{ backgroundImage: 'url("https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/1766477877834-019b4a48-7d31-7199-bc46-cf40fc6e5966-1766479200856.png?width=8000&height=8000&resize=contain")' }}
-        />
         <div className="animate-pulse text-2xl font-bold text-white uppercase italic tracking-tighter relative z-10">Северный человек...</div>
       </div>
     );
@@ -49,13 +45,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen text-zinc-50 font-sans relative">
-      <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
-        style={{ backgroundImage: 'url("https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/1766477877834-019b4a48-7d31-7199-bc46-cf40fc6e5966-1766479200856.png?width=8000&height=8000&resize=contain")' }}
-      />
-      <div className="fixed inset-0 bg-zinc-950/60 z-0 backdrop-blur-[2px]" />
-      
+    <main className="min-h-screen text-zinc-50 font-sans relative bg-zinc-950">
       <div className="relative z-10">
         <header className="border-b border-zinc-800 bg-zinc-900/40 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">

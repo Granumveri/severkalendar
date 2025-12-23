@@ -13,7 +13,12 @@ import { toast } from "sonner";
 import { MapPin, Trash2, User, ExternalLink } from "lucide-react";
 import { Comments } from "@/components/Comments";
 import { sendEventNotification } from "@/app/actions/notifications";
-import { LocationPicker } from "./LocationPicker";
+import dynamic from "next/dynamic";
+
+const LocationPicker = dynamic(() => import("./LocationPicker").then(mod => mod.LocationPicker), {
+  ssr: false,
+  loading: () => <div className="h-[200px] w-full bg-zinc-800 animate-pulse rounded-lg" />
+});
 
 export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUser }: any) {
   const [loading, setLoading] = useState(false);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import FullCalendar from "@fullcalendar/react";
+import dynamic from "next/dynamic";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -13,6 +13,11 @@ import { Plus, Search, MapPin } from "lucide-react";
 import { EventDialog } from "@/components/EventDialog";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+
+const FullCalendar = dynamic(() => import("@fullcalendar/react"), {
+  ssr: false,
+  loading: () => <div className="h-[600px] w-full bg-zinc-800 animate-pulse rounded-lg" />
+});
 
 export function CalendarApp({ currentUser }: { currentUser: any }) {
   const [events, setEvents] = useState<any[]>([]);

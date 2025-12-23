@@ -34,6 +34,7 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
   const [locationLng, setLocationLng] = useState<number | null>(null);
   const [profiles, setProfiles] = useState<any[]>([]);
   const [currentEventId, setCurrentEventId] = useState<string | null>(null);
+  const [firstComment, setFirstComment] = useState("");
 
   useEffect(() => {
     setCurrentEventId(event?.id || null);
@@ -73,6 +74,7 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       setResponsibleId(currentUser.id);
       setLocationLat(null);
       setLocationLng(null);
+      setFirstComment("");
     }
   }, [event, isOpen, currentUser.id]);
 
@@ -163,6 +165,17 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
     if (error) {
       toast.error("Ошибка сохранения: " + error.message);
     } else {
+      // If there's a first comment for a new event, save it
+      if (!event?.id && newId && firstComment.trim()) {
+        await supabase.from("comments").insert([
+          {
+            event_id: newId,
+            user_id: currentUser.id,
+            content: firstComment.trim(),
+          }
+        ]);
+      }
+
       toast.success("Событие сохранено");
       
       if (responsibleId) {
@@ -180,12 +193,7 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       }
 
       onSuccess();
-      if (!event?.id && newId) {
-        setCurrentEventId(newId);
-        // Don't close the dialog so the user can see the comments section
-      } else {
-        onOpenChange(false);
-      }
+      onOpenChange(false);
     }
     setLoading(false);
   };
@@ -348,10 +356,22 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
                 placeholder="Дополнительные детали..."
               />
             </div>
+
+            {!event?.id && (
+              <div className="space-y-2 pt-4 border-t border-zinc-800">
+                <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-red-500">Первая реплика в обсуждении (опционально)</Label>
+                <Input 
+                  value={firstComment} 
+                  onChange={(e) => setFirstComment(e.target.value)} 
+                  className="bg-zinc-950 border-zinc-800 font-bold italic"
+                  placeholder="Напишите что-нибудь для начала обсуждения..."
+                />
+              </div>
+            )}
           </div>
 
-          {currentEventId && (
-            <Comments eventId={currentEventId} currentUser={currentUser} />
+          {event?.id && (
+            <Comments eventId={event.id} currentUser={currentUser} />
           )}
         </div>
 

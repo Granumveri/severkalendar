@@ -79,7 +79,7 @@ export function AuthForm() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" d className="uppercase font-bold text-xs tracking-widest text-zinc-400">Пароль</Label>
+                <Label htmlFor="password" className="uppercase font-bold text-xs tracking-widest text-zinc-400">Пароль</Label>
                 <Input 
                   id="password" 
                   type="password" 

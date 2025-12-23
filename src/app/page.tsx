@@ -89,6 +89,7 @@ export default function Home() {
       <div className="container mx-auto py-8 px-4">
         <CalendarApp currentUser={user} />
       </div>
+    </div>
     </main>
   );
 }

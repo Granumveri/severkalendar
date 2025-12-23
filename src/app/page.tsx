@@ -4,8 +4,13 @@ import { useEffect, useState } from "react";
 import { createClientClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, LogOut } from "lucide-react";
-import { CalendarApp } from "@/components/CalendarApp";
+import dynamic from "next/dynamic";
 import { AuthForm } from "@/components/AuthForm";
+
+const CalendarApp = dynamic(() => import("@/components/CalendarApp").then(mod => mod.CalendarApp), {
+  ssr: false,
+  loading: () => <div className="animate-pulse text-zinc-500">Загрузка календаря...</div>
+});
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);

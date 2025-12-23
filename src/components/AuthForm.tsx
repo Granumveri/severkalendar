@@ -39,11 +39,15 @@ export function AuthForm() {
     setLoading(false);
   };
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-950 p-4 relative overflow-hidden font-sans text-zinc-50">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(45,45,45,0.3),rgba(0,0,0,0.9))]" />
-      
-      <div className="z-10 w-full max-w-md">
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans text-zinc-50">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: 'url("https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/1766477877834-019b4a48-7d31-7199-bc46-cf40fc6e5966-1766478382380.png?width=8000&height=8000&resize=contain")' }}
+        />
+        <div className="absolute inset-0 bg-zinc-950/70 backdrop-blur-[1px]" />
+        
+        <div className="z-10 w-full max-w-md">
         <div className="flex flex-col items-center mb-12">
           <div className="w-16 h-16 bg-zinc-50 rounded-xl flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
             <CalendarIcon className="w-10 h-10 text-black" />

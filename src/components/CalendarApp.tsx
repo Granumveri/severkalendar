@@ -137,8 +137,13 @@ export function CalendarApp({ currentUser }: { currentUser: any }) {
           </Button>
         </div>
   
-            <Card className="p-6 bg-zinc-900 border-zinc-800 shadow-2xl relative overflow-hidden">
-              {loading && (
+              <Card className="p-6 bg-zinc-900 border-zinc-800 shadow-2xl relative overflow-hidden">
+                <div 
+                  className="absolute inset-0 opacity-5 bg-cover bg-center bg-no-repeat pointer-events-none"
+                  style={{ backgroundImage: 'url("https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/1766477877834-019b4a48-7d31-7199-bc46-cf40fc6e5966-1766481191293.png?width=8000&height=8000&resize=contain")' }}
+                />
+                {loading && (
+
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-zinc-50" />
                 </div>

@@ -41,6 +41,10 @@ export function AuthForm() {
 
       return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans text-zinc-50 bg-zinc-950">
+          <div 
+            className="absolute inset-0 opacity-10 bg-cover bg-center bg-no-repeat pointer-events-none"
+            style={{ backgroundImage: 'url("https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/1766477877834-019b4a48-7d31-7199-bc46-cf40fc6e5966-1766481191293.png?width=8000&height=8000&resize=contain")' }}
+          />
           <div className="z-10 w-full max-w-md">
         <div className="flex flex-col items-center mb-12">
           <div className="w-16 h-16 bg-zinc-50 rounded-xl flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(255,255,255,0.2)]">

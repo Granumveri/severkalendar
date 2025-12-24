@@ -13,6 +13,8 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { MapPin, Trash2, ExternalLink } from "lucide-react";
 import { sendEventNotification } from "@/app/actions/notifications";
+import type { User } from "@supabase/supabase-js";
+
 const LocationPicker = dynamic(() => import("./LocationPicker").then(mod => mod.LocationPicker), {
   ssr: false,
   loading: () => <div className="h-[200px] w-full bg-zinc-800 animate-pulse rounded-lg" />
@@ -22,7 +24,15 @@ const Comments = dynamic(() => import("./Comments").then(mod => mod.Comments), {
   ssr: false
 });
 
-export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUser }: any) {
+interface EventDialogProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  event: any;
+  onSuccess: () => void;
+  currentUser: User;
+}
+
+export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUser }: EventDialogProps) {
   const [loading, setLoading] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const [title, setTitle] = useState("");

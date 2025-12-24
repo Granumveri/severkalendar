@@ -7,13 +7,15 @@ import { CalendarIcon, LogOut } from "lucide-react";
 import dynamic from "next/dynamic";
 import { AuthForm } from "@/components/AuthForm";
 
+import type { User } from "@supabase/supabase-js";
+
 const CalendarApp = dynamic(() => import("@/components/CalendarApp").then(mod => mod.CalendarApp), {
   ssr: false,
   loading: () => <div className="animate-pulse text-zinc-500">Загрузка календаря...</div>
 });
 
 export default function Home() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export default function Home() {
     getUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (_event, session) => {
         setUser(session?.user ?? null);
       }
     );

@@ -9,6 +9,8 @@ import { Card } from "@/components/ui/card";
 import { Plus, Search, MapPin } from "lucide-react";
 import ruLocale from "@fullcalendar/core/locales/ru";
 
+import type { User } from "@supabase/supabase-js";
+
 const FullCalendar = dynamic(() => import("@fullcalendar/react"), {
   ssr: false,
   loading: () => <div className="h-[600px] w-full bg-zinc-800 animate-pulse rounded-lg flex items-center justify-center text-zinc-500 font-bold italic uppercase">Загрузка календаря...</div>
@@ -18,7 +20,7 @@ const EventDialog = dynamic(() => import("@/components/EventDialog").then(mod =>
   ssr: false
 });
 
-export function CalendarApp({ currentUser }: { currentUser: any }) {
+export function CalendarApp({ currentUser }: { currentUser: User }) {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);

@@ -10,12 +10,14 @@ import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Send, Paperclip } from "lucide-react";
 
-export function Comments({ eventId, currentUser }: { eventId: string, currentUser: any }) {
+import type { User } from "@supabase/supabase-js";
+
+export function Comments({ eventId, currentUser }: { eventId: string, currentUser: User }) {
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     const supabase = getSupabaseClient();
     const { data } = await supabase
       .from("comments")
@@ -24,7 +26,7 @@ export function Comments({ eventId, currentUser }: { eventId: string, currentUse
       .order("created_at", { ascending: true });
 
     if (data) setComments(data);
-  };
+  }, [eventId]);
 
   useEffect(() => {
     fetchComments();

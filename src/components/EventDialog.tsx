@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { getSupabaseClient } from "@/lib/supabase";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { MapPin, Trash2, User, ExternalLink } from "lucide-react";
+import { sendEventNotification } from "@/app/actions/notifications";
 const LocationPicker = dynamic(() => import("./LocationPicker").then(mod => mod.LocationPicker), {
   ssr: false,
   loading: () => <div className="h-[200px] w-full bg-zinc-800 animate-pulse rounded-lg" />

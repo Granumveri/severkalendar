@@ -5,14 +5,8 @@ import dynamic from "next/dynamic";
 import { getSupabaseClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, MapPin } from "lucide-react";
-import { EventDialog } from "@/components/EventDialog";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import ruLocale from "@fullcalendar/core/locales/ru";
-
-const FullCalendar = dynamic(() => import("@fullcalendar/react"), {
-  ssr: false,
-  loading: () => <div className="h-[600px] w-full bg-zinc-800 animate-pulse rounded-lg flex items-center justify-center text-zinc-500 font-bold italic uppercase">Загрузка календаря...</div>
+const EventDialog = dynamic(() => import("@/components/EventDialog").then(mod => mod.EventDialog), {
+  ssr: false
 });
 
 export function CalendarApp({ currentUser }: { currentUser: any }) {

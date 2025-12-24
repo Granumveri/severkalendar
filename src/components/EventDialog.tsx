@@ -11,13 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { MapPin, Trash2, User, ExternalLink } from "lucide-react";
-import { Comments } from "@/components/Comments";
-import { sendEventNotification } from "@/app/actions/notifications";
-import dynamic from "next/dynamic";
-
 const LocationPicker = dynamic(() => import("./LocationPicker").then(mod => mod.LocationPicker), {
   ssr: false,
   loading: () => <div className="h-[200px] w-full bg-zinc-800 animate-pulse rounded-lg" />
+});
+
+const Comments = dynamic(() => import("./Comments").then(mod => mod.Comments), {
+  ssr: false
 });
 
 export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUser }: any) {

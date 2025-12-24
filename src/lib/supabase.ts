@@ -9,7 +9,8 @@ export function getSupabaseClient() {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
-    throw new Error('Supabase env vars missing');
+    console.warn('Supabase environment variables are missing! Using placeholder.');
+    return createClient('https://aweounqbgshmvxxszgef.supabase.co', 'placeholder');
   }
 
   supabase = createClient(url, key);

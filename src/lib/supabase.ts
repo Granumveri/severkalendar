@@ -13,6 +13,7 @@ export function getSupabaseClient() {
     return createClient('https://aweounqbgshmvxxszgef.supabase.co', 'placeholder');
   }
 
+  // Final production client with fallbacks
   supabase = createClient(url, key);
   return supabase;
 }

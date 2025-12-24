@@ -39,14 +39,22 @@ export default function Home() {
 
     getUser();
 
+    // Safety timeout to prevent infinite loading screen
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user ?? null);
+        setLoading(false);
+        clearTimeout(timeout);
       }
     );
 
     return () => {
       authListener.subscription.unsubscribe();
+      clearTimeout(timeout);
     };
   }, []);
 

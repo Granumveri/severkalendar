@@ -6,20 +6,11 @@ export function getSupabaseClient() {
   if (supabase) return supabase;
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://aweounqbgshmvxxszgef.supabase.co';
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3ZW91bnFiZ3NobXZ4eHN6Z2VmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYzOTAxODQsImV4cCI6MjA4MTk2NjE4NH0._u8JGAsybpw7jFqYu606hMF40Bev6fZf4kJoRX1lRQE';
 
-  if (!url || !key) {
-    console.error('Supabase environment variables are missing!');
-    if (typeof window !== 'undefined') {
-      console.log('Environment check:', { 
-        url: !!url, 
-        key: !!key,
-        all_env: Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_'))
-      });
-    }
-    // Fallback to the known public URL and a placeholder if key is missing
-    // In a real app, you'd want the real key here if possible
-    return createClient(url || 'https://aweounqbgshmvxxszgef.supabase.co', key || 'placeholder');
+  if (!url || !key || key === 'placeholder') {
+    console.error('Supabase configuration is missing!');
+    return createClient('https://aweounqbgshmvxxszgef.supabase.co', 'placeholder');
   }
 
   supabase = createClient(url, key);

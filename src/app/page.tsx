@@ -14,6 +14,7 @@ const CalendarApp = dynamic(() => import("@/components/CalendarApp").then(mod =>
   loading: () => <div className="animate-pulse text-zinc-500">Загрузка календаря...</div>
 });
 
+// Force sync comment - deployment check
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);

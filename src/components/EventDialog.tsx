@@ -59,8 +59,19 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
     if (event) {
       setTitle(event.title || "");
       setDescription(event.description || "");
-      setStartTime(event.start_time ? format(new Date(event.start_time), "yyyy-MM-dd'T'HH:mm") : "");
-      setEndTime(event.end_time ? format(new Date(event.end_time), "yyyy-MM-dd'T'HH:mm") : "");
+      
+      const safeFormat = (dateStr: string) => {
+        try {
+          const d = new Date(dateStr);
+          if (isNaN(d.getTime())) return "";
+          return format(d, "yyyy-MM-dd'T'HH:mm");
+        } catch (e) {
+          return "";
+        }
+      };
+
+      setStartTime(event.start_time ? safeFormat(event.start_time) : "");
+      setEndTime(event.end_time ? safeFormat(event.end_time) : "");
       setLocation(event.location || "");
       setCategory(event.category || "meeting");
       setResponsibleId(event.responsible_id || null);
@@ -73,12 +84,12 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
       setEndTime("");
       setLocation("");
       setCategory("meeting");
-      setResponsibleId(currentUser.id);
+      setResponsibleId(currentUser?.id || null);
       setLocationLat(null);
       setLocationLng(null);
       setFirstComment("");
     }
-  }, [event, isOpen, currentUser.id]);
+  }, [event, isOpen, currentUser?.id]);
 
   useEffect(() => {
     if (!location || location.length < 3) {

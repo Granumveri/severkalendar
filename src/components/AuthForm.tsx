@@ -28,7 +28,7 @@ export function AuthForm() {
           options: { 
             data: { 
               full_name: email.split('@')[0], 
-              role: 'participant', 
+              role: 'Участник', 
               username: email.split('@')[0] 
             } 
           } 

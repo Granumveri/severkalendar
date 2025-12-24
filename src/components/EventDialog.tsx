@@ -242,189 +242,206 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
     setLoading(false);
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-zinc-900 border-zinc-800 text-zinc-50 max-w-2xl max-h-[90vh] overflow-y-auto p-0 border-none shadow-2xl">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-zinc-50 to-red-600" />
-        
-        <div className="p-8 space-y-8">
-            <DialogHeader>
-              <DialogTitle className="text-3xl font-black italic uppercase italic tracking-tighter">
-                {currentEventId ? "Редактирование" : "Новая запись"}
-              </DialogTitle>
-            </DialogHeader>
+    const isAuthorized = currentUser.id === event?.owner_id || currentUser.id === event?.responsible_id;
 
-            <div className="grid gap-6">
+    return (
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 text-zinc-50 max-w-2xl max-h-[90vh] overflow-y-auto p-0 border-none shadow-2xl">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-zinc-50 to-red-600" />
+          
+          <div className="p-8 space-y-8">
+              <DialogHeader>
+                <DialogTitle className="text-3xl font-black italic uppercase italic tracking-tighter">
+                  {currentEventId ? "Редактирование" : "Новая запись"}
+                </DialogTitle>
+              </DialogHeader>
+  
+              <div className="grid gap-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Заголовок</Label>
+                    <Input 
+                      value={title} 
+                      onChange={(e) => setTitle(e.target.value)} 
+                      disabled={currentEventId && !isAuthorized}
+                      className="bg-zinc-950 border-zinc-800 font-bold italic h-12 text-lg disabled:opacity-50"
+                      placeholder="Название мероприятия..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Ответственный</Label>
+                    <Select 
+                      value={responsibleId || ""} 
+                      onValueChange={setResponsibleId}
+                      disabled={currentEventId && !isAuthorized}
+                    >
+                      <SelectTrigger className="bg-zinc-950 border-zinc-800 font-bold italic h-12 disabled:opacity-50">
+                        <SelectValue placeholder="Выберите ответственного" />
+                      </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-50 font-bold italic">
+                          {profiles.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>{p.full_name || 'Без имени'}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {responsibleId && profiles.find(p => p.id === responsibleId)?.email && (
+                        <div className="mt-1">
+                          <a 
+                            href={`mailto:${profiles.find(p => p.id === responsibleId).email}`}
+                            className="text-[10px] text-red-500 hover:text-red-400 font-bold flex items-center gap-1 uppercase"
+                          >
+                            Связаться по почте
+                          </a>
+                        </div>
+                      )}
+                    </div>
+  
+                </div>
+  
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Заголовок</Label>
+                  <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Начало</Label>
                   <Input 
-                    value={title} 
-                    onChange={(e) => setTitle(e.target.value)} 
-                    className="bg-zinc-950 border-zinc-800 font-bold italic h-12 text-lg"
-                    placeholder="Название мероприятия..."
+                    type="datetime-local" 
+                    value={startTime} 
+                    onChange={(e) => setStartTime(e.target.value)} 
+                    disabled={currentEventId && !isAuthorized}
+                    className="bg-zinc-950 border-zinc-800 font-bold italic disabled:opacity-50"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Ответственный</Label>
-                  <Select value={responsibleId || ""} onValueChange={setResponsibleId}>
-                    <SelectTrigger className="bg-zinc-950 border-zinc-800 font-bold italic h-12">
-                      <SelectValue placeholder="Выберите ответственного" />
+                  <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Конец</Label>
+                  <Input 
+                    type="datetime-local" 
+                    value={endTime} 
+                    onChange={(e) => setEndTime(e.target.value)} 
+                    disabled={currentEventId && !isAuthorized}
+                    className="bg-zinc-950 border-zinc-800 font-bold italic disabled:opacity-50"
+                  />
+                </div>
+              </div>
+  
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Категория</Label>
+                  <Select 
+                    value={category} 
+                    onValueChange={setCategory}
+                    disabled={currentEventId && !isAuthorized}
+                  >
+                    <SelectTrigger className="bg-zinc-950 border-zinc-800 font-bold italic disabled:opacity-50">
+                      <SelectValue />
                     </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-50 font-bold italic">
-                        {profiles.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>{p.full_name || 'Без имени'}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {responsibleId && profiles.find(p => p.id === responsibleId)?.email && (
-                      <div className="mt-1">
+                    <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-50 font-bold italic">
+                      <SelectItem value="meeting">ВСТРЕЧА</SelectItem>
+                      <SelectItem value="deadline">СРОЧНО</SelectItem>
+                      <SelectItem value="vacation">ОТПУСК</SelectItem>
+                      <SelectItem value="other">ПРОЧЕЕ</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                    <div className="space-y-4">
+                      <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">
+                        Локация {geocoding && <span className="animate-pulse text-red-500 ml-2">(ПОИСК...)</span>}
+                      </Label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                        <Input 
+                          value={location} 
+                          onChange={(e) => setLocation(e.target.value)} 
+                          disabled={currentEventId && !isAuthorized}
+                          className="pl-10 bg-zinc-950 border-zinc-800 font-bold italic disabled:opacity-50"
+                          placeholder="Место встречи..."
+                        />
+                      </div>
+                    
+                    <LocationPicker 
+                      lat={locationLat} 
+                      lng={locationLng} 
+                      onChange={(lat, lng) => {
+                        setLocationLat(lat);
+                        setLocationLng(lng);
+                      }} 
+                    />
+                    
+                    {locationLat && locationLng && (
+                      <div className="flex gap-4">
                         <a 
-                          href={`mailto:${profiles.find(p => p.id === responsibleId).email}`}
-                          className="text-[10px] text-red-500 hover:text-red-400 font-bold flex items-center gap-1 uppercase"
+                          href={`https://yandex.ru/maps/?pt=${locationLng},${locationLat}&z=16&l=map`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 uppercase font-bold transition-colors"
                         >
-                          Связаться по почте
+                          <ExternalLink className="w-3 h-3" />
+                          ЯНДЕКС КАРТЫ
+                        </a>
+                        <a 
+                          href={`https://2gis.ru/geo/${locationLng},${locationLat}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 uppercase font-bold transition-colors"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          2GIS
                         </a>
                       </div>
                     )}
                   </div>
-
+  
               </div>
-
-            <div className="grid grid-cols-2 gap-4">
+  
               <div className="space-y-2">
-                <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Начало</Label>
-                <Input 
-                  type="datetime-local" 
-                  value={startTime} 
-                  onChange={(e) => setStartTime(e.target.value)} 
-                  className="bg-zinc-950 border-zinc-800 font-bold italic"
+                <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Описание</Label>
+                <Textarea 
+                  value={description} 
+                  onChange={(e) => setDescription(e.target.value)} 
+                  disabled={currentEventId && !isAuthorized}
+                  className="bg-zinc-950 border-zinc-800 min-h-[100px] font-bold italic text-zinc-400 disabled:opacity-50"
+                  placeholder="Дополнительные детали..."
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Конец</Label>
-                <Input 
-                  type="datetime-local" 
-                  value={endTime} 
-                  onChange={(e) => setEndTime(e.target.value)} 
-                  className="bg-zinc-950 border-zinc-800 font-bold italic"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Категория</Label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="bg-zinc-950 border-zinc-800 font-bold italic">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-50 font-bold italic">
-                    <SelectItem value="meeting">ВСТРЕЧА</SelectItem>
-                    <SelectItem value="deadline">СРОЧНО</SelectItem>
-                    <SelectItem value="vacation">ОТПУСК</SelectItem>
-                    <SelectItem value="other">ПРОЧЕЕ</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-                  <div className="space-y-4">
-                    <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">
-                      Локация {geocoding && <span className="animate-pulse text-red-500 ml-2">(ПОИСК...)</span>}
-                    </Label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                      <Input 
-                        value={location} 
-                        onChange={(e) => setLocation(e.target.value)} 
-                        className="pl-10 bg-zinc-950 border-zinc-800 font-bold italic"
-                        placeholder="Место встречи..."
-                      />
-                    </div>
-                  
-                  <LocationPicker 
-                    lat={locationLat} 
-                    lng={locationLng} 
-                    onChange={(lat, lng) => {
-                      setLocationLat(lat);
-                      setLocationLng(lng);
-                    }} 
+  
+              {!event?.id && (
+                <div className="space-y-2 pt-4 border-t border-zinc-800">
+                  <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-red-500">Первая реплика в обсуждении (опционально)</Label>
+                  <Input 
+                    value={firstComment} 
+                    onChange={(e) => setFirstComment(e.target.value)} 
+                    className="bg-zinc-950 border-zinc-800 font-bold italic"
+                    placeholder="Напишите что-нибудь для начала обсуждения..."
                   />
-                  
-                  {locationLat && locationLng && (
-                    <div className="flex gap-4">
-                      <a 
-                        href={`https://yandex.ru/maps/?pt=${locationLng},${locationLat}&z=16&l=map`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 uppercase font-bold transition-colors"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        ЯНДЕКС КАРТЫ
-                      </a>
-                      <a 
-                        href={`https://2gis.ru/geo/${locationLng},${locationLat}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 uppercase font-bold transition-colors"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        2GIS
-                      </a>
-                    </div>
-                  )}
                 </div>
-
+              )}
             </div>
-
-            <div className="space-y-2">
-              <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-zinc-500">Описание</Label>
-              <Textarea 
-                value={description} 
-                onChange={(e) => setDescription(e.target.value)} 
-                className="bg-zinc-950 border-zinc-800 min-h-[100px] font-bold italic text-zinc-400"
-                placeholder="Дополнительные детали..."
-              />
-            </div>
-
-            {!event?.id && (
-              <div className="space-y-2 pt-4 border-t border-zinc-800">
-                <Label className="uppercase font-black text-[10px] tracking-[0.2em] text-red-500">Первая реплика в обсуждении (опционально)</Label>
-                <Input 
-                  value={firstComment} 
-                  onChange={(e) => setFirstComment(e.target.value)} 
-                  className="bg-zinc-950 border-zinc-800 font-bold italic"
-                  placeholder="Напишите что-нибудь для начала обсуждения..."
-                />
-              </div>
+  
+            {event?.id && (
+              <Comments eventId={event.id} currentUser={currentUser} />
             )}
           </div>
-
-          {event?.id && (
-            <Comments eventId={event.id} currentUser={currentUser} />
-          )}
-        </div>
-
-        <DialogFooter className="p-8 pt-0 flex justify-between items-center bg-zinc-900/50">
-          <div>
-            {currentEventId && (
-              <Button 
-                variant="ghost" 
-                onClick={handleDelete} 
-                className="text-red-600 hover:text-red-500 hover:bg-red-600/10 font-black italic uppercase text-xs"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Удалить
-              </Button>
-            )}
-          </div>
-          <div className="flex gap-4">
-            <Button variant="outline" onClick={() => onOpenChange(false)} className="border-zinc-800 font-black italic uppercase text-xs">Отмена</Button>
-            <Button onClick={handleSave} disabled={loading} className="bg-zinc-50 text-black font-black italic uppercase text-xs px-8">
-              {loading ? "СОХРАНЕНИЕ..." : "СОХРАНИТЬ"}
-            </Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+  
+          <DialogFooter className="p-8 pt-0 flex justify-between items-center bg-zinc-900/50">
+            <div>
+              {currentEventId && isAuthorized && (
+                <Button 
+                  variant="ghost" 
+                  onClick={handleDelete} 
+                  className="text-red-600 hover:text-red-500 hover:bg-red-600/10 font-black italic uppercase text-xs"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Удалить
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-4">
+              <Button variant="outline" onClick={() => onOpenChange(false)} className="border-zinc-800 font-black italic uppercase text-xs">Отмена</Button>
+              {(isAuthorized || !currentEventId) && (
+                <Button onClick={handleSave} disabled={loading} className="bg-zinc-50 text-black font-black italic uppercase text-xs px-8">
+                  {loading ? "СОХРАНЕНИЕ..." : "СОХРАНИТЬ"}
+                </Button>
+              )}
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
 }

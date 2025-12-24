@@ -30,18 +30,24 @@ export function CalendarApp({ currentUser }: { currentUser: User }) {
 
   useEffect(() => {
     const loadPlugins = async () => {
-      const [dayGrid, interaction, timeGrid, list] = await Promise.all([
-        import('@fullcalendar/daygrid'),
-        import('@fullcalendar/interaction'),
-        import('@fullcalendar/timegrid'),
-        import('@fullcalendar/list'),
-      ]);
-      setCalendarPlugins([
-        dayGrid.default,
-        interaction.default,
-        timeGrid.default,
-        list.default,
-      ]);
+      try {
+        const [dayGrid, interaction, timeGrid, list] = await Promise.all([
+          import('@fullcalendar/daygrid'),
+          import('@fullcalendar/interaction'),
+          import('@fullcalendar/timegrid'),
+          import('@fullcalendar/list'),
+        ]);
+        
+        // В FullCalendar v6 плагины могут быть как в .default, так и самим модулем
+        setCalendarPlugins([
+          dayGrid.default || dayGrid,
+          interaction.default || interaction,
+          timeGrid.default || timeGrid,
+          list.default || list,
+        ]);
+      } catch (error) {
+        console.error("Error loading FullCalendar plugins:", error);
+      }
     };
     loadPlugins();
   }, []);
@@ -193,10 +199,11 @@ export function CalendarApp({ currentUser }: { currentUser: User }) {
                     events={filteredEvents}
                     select={handleDateSelect}
 
-                  eventClick={handleEventClick}
-                  eventContent={renderEventContent}
-                  locale={ruLocale}
-                  height="auto"
+                    eventClick={handleEventClick}
+                    eventContent={renderEventContent}
+                    locale="ru"
+                    locales={[ruLocale]}
+                    height="auto"
                   slotMinTime="07:00:00"
                   slotMaxTime="22:00:00"
                 />

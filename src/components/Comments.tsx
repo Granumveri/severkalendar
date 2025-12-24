@@ -43,7 +43,7 @@ export function Comments({ eventId, currentUser }: { eventId: string, currentUse
     return () => {
       subscription.unsubscribe();
     };
-  }, [eventId]);
+  }, [eventId, fetchComments]);
 
     const handleSend = async () => {
       if (!newComment.trim()) return;

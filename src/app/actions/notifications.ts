@@ -50,8 +50,9 @@ export async function sendEventNotification({
     }
 
     return { success: true, data };
-  } catch (error: any) {
-    console.error("Failed to send email:", error);
-    return { success: false, error: error.message };
-  }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Failed to send email:", error);
+      return { success: false, error: errorMessage };
+    }
 }

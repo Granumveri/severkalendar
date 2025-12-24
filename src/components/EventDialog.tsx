@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { MapPin, Trash2, User, ExternalLink } from "lucide-react";
+import { MapPin, Trash2, ExternalLink } from "lucide-react";
 import { sendEventNotification } from "@/app/actions/notifications";
 const LocationPicker = dynamic(() => import("./LocationPicker").then(mod => mod.LocationPicker), {
   ssr: false,
@@ -65,7 +65,7 @@ export function EventDialog({ isOpen, onOpenChange, event, onSuccess, currentUse
           const d = new Date(dateStr);
           if (isNaN(d.getTime())) return "";
           return format(d, "yyyy-MM-dd'T'HH:mm");
-        } catch (e) {
+        } catch {
           return "";
         }
       };

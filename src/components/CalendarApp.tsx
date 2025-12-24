@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { getSupabaseClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
